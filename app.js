@@ -63,33 +63,39 @@ function calculateRetirement() {
   const yearsWorked = state.currentYear - state.workStartYear;
   const yearsUntilRetirement = state.retirementAge - state.currentAge;
   const totalWorkYears = yearsWorked + yearsUntilRetirement;
-  
+
   const salaryIncreaseDecimal = state.salaryIncreaseRate / 100;
   const providentFundDecimal = state.providentFundRate / 100;
   const totalProvidentFundRate = providentFundDecimal * 2; // พนักงาน + นายจ้าง
   const fundReturnRateDecimal = state.fundReturnRate / 100; // ใช้ค่าที่ผู้ใช้กรอก
-  
+
   const salaryAt60 = Math.round(
     state.currentSalary * Math.pow(1 + salaryIncreaseDecimal, yearsUntilRetirement)
   );
-  
-  // คำนวณโบนัสแต่ละปี
+
+  // คำนวณโบนัสแต่ละปี (ใช้ฐานเงินเดือนปีก่อน)
   const bonusByYear = [];
-  let tempSalary = state.currentSalary;
+  let previousYearSalary = state.currentSalary; // เงินเดือนปีก่อน = เงินเดือนปัจจุบัน (สำหรับปีแรก)
+  let currentYearSalary = state.currentSalary;
+
   for (let year = 0; year < yearsUntilRetirement; year++) {
-    const bonus = Math.round(tempSalary * state.bonusRate);
+    // โบนัสคำนวณจากเงินเดือนปีก่อน
+    const bonus = Math.round(previousYearSalary * state.bonusRate);
     bonusByYear.push({
       year: state.currentYear + year,
-      salary: Math.round(tempSalary),
+      salary: Math.round(currentYearSalary), // เงินเดือนปีปัจจุบัน
+      baseSalary: Math.round(previousYearSalary), // ฐานเงินเดือนที่ใช้คำนวณโบนัส (ปีก่อน)
       bonus: bonus
     });
-    tempSalary *= (1 + salaryIncreaseDecimal);
+    // เตรียมสำหรับปีถัดไป
+    previousYearSalary = currentYearSalary; // เงินเดือนปีนี้จะเป็นฐานโบนัสปีหน้า
+    currentYearSalary *= (1 + salaryIncreaseDecimal); // เงินเดือนปีหน้า
   }
-  
+
   // คำนวณกองทุนสำรองเลี้ยงชีพ (เฉพาะที่จะออมในอนาคต)
   let futureProvidentFund = 0;
   let currentSalaryForPF = state.currentSalary;
-  
+
   for (let year = 0; year < yearsUntilRetirement; year++) {
     const yearlyContribution = currentSalaryForPF * 12 * totalProvidentFundRate;
     const yearsRemaining = yearsUntilRetirement - year;
@@ -97,19 +103,19 @@ function calculateRetirement() {
     futureProvidentFund += futureValue;
     currentSalaryForPF *= (1 + salaryIncreaseDecimal);
   }
-  
+
   // รวมเงินกองทุนทั้งหมด
   const existingFundAtRetirement = state.existingProvidentFund;
   const totalProvidentFund = existingFundAtRetirement + futureProvidentFund;
-  
+
   // คำนวณเงินเกษียณอายุ
   const retirement1 = (salaryAt60 * 400) / 30;
   const retirement2 = (salaryAt60 * totalWorkYears) / 2;
   const retirementBenefit = Math.max(retirement1, retirement2);
-  
+
   // รวมเงินทั้งหมด
   const totalMoney = retirementBenefit + totalProvidentFund;
-  
+
   return {
     yearsWorked,
     yearsUntilRetirement,
@@ -215,12 +221,12 @@ function renderBonusList(data) {
     container.innerHTML = '<p style="text-align: center; color: var(--color-gray-400);">ไม่มีข้อมูลโบนัส</p>';
     return;
   }
-  
+
   const html = data.bonusByYear.map(item => `
     <div class="bonus-item">
       <div class="bonus-item-left">
         <span class="bonus-item-year">ปี ${item.year}</span>
-        <span class="bonus-item-salary">เงินเดือน ${formatNumber(item.salary)} ฿</span>
+        <span class="bonus-item-salary">เงินเดือน ${formatNumber(item.salary)} ฿ (ฐาน: ${formatNumber(item.baseSalary)} ฿)</span>
       </div>
       <div class="bonus-item-right">
         <span class="bonus-item-value">${formatNumber(item.bonus)} ฿</span>
@@ -228,7 +234,7 @@ function renderBonusList(data) {
       </div>
     </div>
   `).join('');
-  
+
   container.innerHTML = html;
 }
 
@@ -236,7 +242,7 @@ function renderRetirementFormulas(data) {
   const container = document.getElementById('formulasList');
   const formula1Selected = data.retirement1 >= data.retirement2;
   const formula2Selected = data.retirement2 > data.retirement1;
-  
+
   container.innerHTML = `
     <div class="formula-item ${formula1Selected ? 'selected' : ''}">
       <p class="formula-title">
@@ -283,11 +289,11 @@ function renderSummary(data) {
 
 function updateUI() {
   const data = calculateRetirement();
-  
+
   // Show/hide sections
   document.getElementById('resultsContainer').style.display = 'block';
   document.getElementById('emptyState').style.display = 'none';
-  
+
   // Render all sections
   renderBasicInfo(data);
   renderStatsCards(data);
@@ -308,7 +314,7 @@ function updateStateFromInputs() {
   state.providentFundRate = Number(document.getElementById('providentFundRate').value) || 0;
   state.fundReturnRate = Number(document.getElementById('fundReturnRate').value) || 1;
   state.existingProvidentFund = Number(document.getElementById('existingProvidentFund').value) || 0;
-  
+
   saveToLocalStorage();
 }
 
@@ -325,23 +331,23 @@ function loadStateToInputs() {
 
 function handleCalculate() {
   updateStateFromInputs();
-  
+
   // Validate inputs
   if (state.workStartYear === 0 || state.currentAge === 0 || state.currentSalary === 0) {
     alert('⚠️ กรุณากรอกข้อมูลที่จำเป็น: ปีเริ่มงาน, อายุปัจจุบัน, และเงินเดือน');
     return;
   }
-  
+
   if (state.workStartYear > state.currentYear) {
     alert('⚠️ ปีเริ่มงานต้องไม่มากกว่าปีปัจจุบัน');
     return;
   }
-  
+
   if (state.currentAge >= state.retirementAge) {
     alert('⚠️ อายุปัจจุบันต้องน้อยกว่าอายุเกษียณ (60 ปี)');
     return;
   }
-  
+
   updateUI();
 }
 
@@ -358,17 +364,17 @@ function confirmClear() {
       state[key] = key === 'fundReturnRate' ? 1 : 0;
     }
   });
-  
+
   // Clear localStorage
   clearLocalStorage();
-  
+
   // Clear inputs
   loadStateToInputs();
-  
+
   // Hide results
   document.getElementById('resultsContainer').style.display = 'none';
   document.getElementById('emptyState').style.display = 'block';
-  
+
   // Hide modal
   document.getElementById('confirmModal').classList.remove('show');
 }
@@ -391,7 +397,7 @@ function setupAutoSave() {
     'fundReturnRate',
     'existingProvidentFund'
   ];
-  
+
   inputs.forEach(id => {
     const input = document.getElementById(id);
     input.addEventListener('input', () => {
@@ -406,10 +412,10 @@ function setupAutoSave() {
 function init() {
   console.log('🚀 Initializing Retirement Calculator...');
   console.log('📅 ปีปัจจุบัน:', state.currentYear);
-  
+
   // Load data from localStorage
   const hasData = loadFromLocalStorage();
-  
+
   if (hasData) {
     console.log('📦 พบข้อมูลที่บันทึกไว้');
     loadStateToInputs();
@@ -420,23 +426,23 @@ function init() {
   } else {
     console.log('📝 ไม่พบข้อมูลที่บันทึกไว้');
   }
-  
+
   // Setup event listeners
   document.getElementById('calculateBtn').addEventListener('click', handleCalculate);
   document.getElementById('clearBtn').addEventListener('click', handleClear);
   document.getElementById('confirmYes').addEventListener('click', confirmClear);
   document.getElementById('confirmNo').addEventListener('click', cancelClear);
-  
+
   // Setup auto-save
   setupAutoSave();
-  
+
   // Close modal on backdrop click
   document.getElementById('confirmModal').addEventListener('click', (e) => {
     if (e.target.id === 'confirmModal') {
       cancelClear();
     }
   });
-  
+
   console.log('✅ Initialization complete!');
 }
 
