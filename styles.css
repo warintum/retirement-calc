@@ -507,6 +507,16 @@ body {
   margin-bottom: var(--space-10);
 }
 
+.stats-header {
+  margin-bottom: var(--space-4);
+}
+
+@media (min-width: 769px) {
+  .stats-header {
+    display: none;
+  }
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -962,6 +972,97 @@ body {
 }
 
 /* =================================
+   Touch-friendly & Modern Interactions
+   ================================= */
+@media (hover: none) and (pointer: coarse) {
+  /* Touch devices */
+  .btn:active {
+    transform: scale(0.98);
+  }
+  
+  .stat-card:active {
+    transform: scale(0.98);
+  }
+  
+  .info-card:active {
+    transform: scale(0.98);
+  }
+  
+  .bonus-item:active {
+    background: var(--color-gray-100);
+  }
+}
+
+/* Modern card shadows for mobile */
+@media (max-width: 768px) {
+  .info-card,
+  .stat-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  }
+  
+  .input-panel,
+  .basic-info,
+  .detail-card {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  }
+}
+
+/* Modern Mobile Card Styles */
+@media (max-width: 768px) {
+  /* Modern info & stat card layout */
+  .info-card,
+  .stat-card {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .info-card::after,
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    opacity: 0.6;
+  }
+  
+  /* Info Card Colors */
+  .info-card.blue::after {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  }
+  
+  .info-card.orange::after {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  }
+  
+  .info-card.green::after {
+    background: linear-gradient(90deg, #10b981, #34d399);
+  }
+  
+  .info-card.purple::after {
+    background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+  }
+  
+  /* Stat Card Colors (based on gradient backgrounds) */
+  .stat-card:nth-child(1)::after {
+    background: linear-gradient(90deg, #818cf8, #6366f1);
+  }
+  
+  .stat-card:nth-child(2)::after {
+    background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+  }
+  
+  .stat-card:nth-child(3)::after {
+    background: linear-gradient(90deg, #f87171, #ef4444);
+  }
+  
+  .stat-card:nth-child(4)::after {
+    background: linear-gradient(90deg, #4ade80, #22c55e);
+  }
+}
+
+/* =================================
    Footer
    ================================= */
 .footer {
@@ -972,31 +1073,90 @@ body {
 }
 
 /* =================================
-   Responsive Design
+   Mobile-First Modern Responsive Design
    ================================= */
+
+/* Tablet (768px and below) */
 @media (max-width: 768px) {
   .header-title {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
 
   .header-subtitle {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
 
   .header {
     padding: var(--space-6);
+    border-radius: var(--radius-2xl);
+  }
+
+  .header-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .header-icon i {
+    width: 32px;
+    height: 32px;
   }
 
   .input-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .basic-info-grid {
     grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
   }
 
+  .input-field label {
+    font-size: 0.8rem;
+  }
+
+  .input-field input {
+    padding: var(--space-3);
+    font-size: 0.95rem;
+  }
+
+  /* Basic Info - Modern 2x2 Grid */
+  .basic-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  .info-card {
+    padding: var(--space-4);
+  }
+
+  .info-card-value {
+    font-size: 1.5rem;
+  }
+
+  .info-card-label {
+    font-size: 0.7rem;
+  }
+
+  /* Stats - Modern 2x2 Grid (Same as Basic Info) */
   .stats-grid {
-    grid-template-columns: 1fr;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  .stat-card {
+    min-width: auto;
+    max-width: none;
+  }
+
+  .stat-card-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .stat-card-value {
+    font-size: 1.375rem;
+  }
+
+  .stat-card-subtitle {
+    font-size: 0.7rem;
   }
 
   .details-section {
@@ -1004,11 +1164,20 @@ body {
   }
 
   .summary-value {
-    font-size: 2.75rem;
+    font-size: 2.25rem;
   }
 
   .summary-title {
-    font-size: 1.625rem;
+    font-size: 1.375rem;
+  }
+
+  .summary-section {
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .summary-icon {
+    width: 64px;
+    height: 64px;
   }
 
   .app-container {
@@ -1020,43 +1189,242 @@ body {
   .detail-card,
   .summary-section,
   .empty-state {
-    padding: var(--space-6);
+    padding: var(--space-5);
+    border-radius: var(--radius-2xl);
   }
   
   .modal-content {
-    padding: var(--space-8);
+    padding: var(--space-6);
+    border-radius: var(--radius-2xl);
+  }
+
+  .bonus-list {
+    max-height: 350px;
+  }
+
+  .formula-item {
+    padding: var(--space-4);
   }
 }
 
-@media (max-width: 480px) {
-  .basic-info-grid {
-    grid-template-columns: 1fr;
+/* Mobile Large (640px and below) */
+@media (max-width: 640px) {
+  .input-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
   }
 
+  .stat-card-value {
+    font-size: 1.5rem;
+  }
+}
+
+/* Mobile (480px and below) */
+@media (max-width: 480px) {
+  .header-title {
+    font-size: 1.5rem;
+  }
+
+  .header-subtitle {
+    font-size: 0.875rem;
+  }
+
+  .header {
+    padding: var(--space-5);
+    margin-bottom: var(--space-6);
+  }
+
+  .header-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-xl);
+  }
+
+  .header-icon i {
+    width: 28px;
+    height: 28px;
+  }
+
+  /* Input Fields - 2 columns on Small Mobile */
+  .input-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .section-header h2 {
+    font-size: 1.125rem;
+  }
+
+  /* Basic Info - Compact 2x2 Grid */
+  .basic-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .info-card {
+    padding: var(--space-3);
+    border-radius: var(--radius-xl);
+  }
+
+  .info-card-value {
+    font-size: 1.25rem;
+  }
+
+  .info-card-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.02em;
+  }
+
+  .info-card-unit {
+    font-size: 0.7rem;
+  }
+
+  /* Stats - Compact 2x2 Grid */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+
+  .stat-card {
+    min-width: auto;
+    max-width: none;
+    padding: var(--space-4);
+  }
+
+  .stat-card-icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .stat-card-title {
+    font-size: 0.8rem;
+  }
+
+  .stat-card-value {
+    font-size: 1.375rem;
+  }
+
+  .stat-card-subtitle {
+    font-size: 0.7rem;
+  }
+
+  /* Buttons - Full Width Stack */
   .button-group {
     flex-direction: column;
+    gap: var(--space-3);
   }
 
   .btn {
     width: 100%;
     justify-content: center;
+    padding: var(--space-3) var(--space-6);
+    font-size: 0.95rem;
+  }
+
+  .summary-section {
+    padding: var(--space-6) var(--space-5);
   }
 
   .summary-value {
-    font-size: 2.25rem;
+    font-size: 1.875rem;
   }
-  
-  .header-icon {
-    width: 64px;
-    height: 64px;
+
+  .summary-title {
+    font-size: 1.25rem;
   }
-  
-  .header-icon i {
-    width: 32px;
-    height: 32px;
+
+  .summary-icon {
+    width: 56px;
+    height: 56px;
   }
-  
-  .modal-buttons {
-    flex-direction: column;
+
+  .summary-details {
+    font-size: 1rem;
+  }
+
+  .bonus-item {
+    padding: var(--space-3);
+  }
+
+  .bonus-item-year {
+    font-size: 0.85rem;
+  }
+
+  .bonus-item-value {
+    font-size: 1rem;
+  }
+
+  .retirement-badge {
+    font-size: 0.65rem;
+    padding: 2px var(--space-2);
+  }
+
+  .modal-content {
+    padding: var(--space-5);
+    width: 95%;
+  }
+
+  .modal-icon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .modal-content h3 {
+    font-size: 1.375rem;
+  }
+
+  .footer {
+    padding: var(--space-6) var(--space-4);
+    font-size: 0.8rem;
+  }
+}
+
+/* Small Mobile (360px and below) */
+@media (max-width: 360px) {
+  .input-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+
+  .input-field label {
+    font-size: 0.75rem;
+  }
+
+  .input-field input {
+    padding: var(--space-2);
+    font-size: 0.875rem;
+  }
+
+  .basic-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+
+  .info-card {
+    padding: var(--space-2);
+  }
+
+  .info-card-value {
+    font-size: 1.125rem;
+  }
+
+  .info-card-label {
+    font-size: 0.6rem;
+  }
+
+  .stats-grid {
+    gap: var(--space-2);
+  }
+
+  .stat-card {
+    padding: var(--space-3);
+  }
+
+  .stat-card-value {
+    font-size: 1.125rem;
+  }
+
+  .stat-card-title {
+    font-size: 0.75rem;
   }
 }
