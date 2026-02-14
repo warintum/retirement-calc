@@ -74,19 +74,27 @@ function calculateRetirement() {
   );
 
   // คำนวณโบนัสแต่ละปี (ใช้ฐานเงินเดือนปีก่อน)
+  // เริ่มจากปีหน้า (ไม่แสดงปีปัจจุบัน) ไปจนถึงปีเกษียณ
   const bonusByYear = [];
-  let previousYearSalary = state.currentSalary; // เงินเดือนปีก่อน = เงินเดือนปัจจุบัน (สำหรับปีแรก)
+  let previousYearSalary = state.currentSalary; // เงินเดือนปีปัจจุบัน เป็นฐานคำนวณโบนัสปีหน้า
   let currentYearSalary = state.currentSalary;
+  
+  // คำนวณเงินเดือนปีหน้าก่อน (สำหรับเป็นฐานโบนัสปีแรกที่แสดง)
+  currentYearSalary *= (1 + salaryIncreaseDecimal);
 
-  for (let year = 0; year < yearsUntilRetirement; year++) {
+  for (let year = 1; year <= yearsUntilRetirement; year++) {
     // โบนัสคำนวณจากเงินเดือนปีก่อน
     const bonus = Math.round(previousYearSalary * state.bonusRate);
+    const isRetirementYear = year === yearsUntilRetirement;
+    
     bonusByYear.push({
       year: state.currentYear + year,
       salary: Math.round(currentYearSalary), // เงินเดือนปีปัจจุบัน
       baseSalary: Math.round(previousYearSalary), // ฐานเงินเดือนที่ใช้คำนวณโบนัส (ปีก่อน)
-      bonus: bonus
+      bonus: bonus,
+      isRetirementYear: isRetirementYear
     });
+    
     // เตรียมสำหรับปีถัดไป
     previousYearSalary = currentYearSalary; // เงินเดือนปีนี้จะเป็นฐานโบนัสปีหน้า
     currentYearSalary *= (1 + salaryIncreaseDecimal); // เงินเดือนปีหน้า
@@ -223,9 +231,11 @@ function renderBonusList(data) {
   }
 
   const html = data.bonusByYear.map(item => `
-    <div class="bonus-item">
+    <div class="bonus-item ${item.isRetirementYear ? 'retirement-year' : ''}">
       <div class="bonus-item-left">
-        <span class="bonus-item-year">ปี ${item.year}</span>
+        <span class="bonus-item-year">
+          ปี ${item.year} ${item.isRetirementYear ? '<span class="retirement-badge">🎉 ปีเกษียณ</span>' : ''}
+        </span>
         <span class="bonus-item-salary">เงินเดือน ${formatNumber(item.salary)} ฿ (ฐาน: ${formatNumber(item.baseSalary)} ฿)</span>
       </div>
       <div class="bonus-item-right">
